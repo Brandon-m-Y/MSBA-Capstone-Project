@@ -8,6 +8,8 @@
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 > **Predict which bank customers will subscribe to a term deposit — and segment them into actionable marketing clusters — using a full end-to-end ML pipeline deployed in an interactive Streamlit dashboard.**
+>
+> 
 [See The Deployed Project Here!]('https://msba-capstone-project.streamlit.app/)
 ---
 
