@@ -20,7 +20,7 @@ analysis_page = st.Page("2_General_Analysis.py", title="Exploratory Data Analysi
 segmentation_page = st.Page("3_Segmentation_Anlaysis.py", title="Marketing Segmentation")
 modeling_page = st.Page("4_Model_Prediction.py", title="Predict New Customers")
 models_page = st.Page('5_Model_Assumptions.py', title='About The Models')
-data_page = st.Page('6_About_The_Data.py', title='About The Data')
+data_page = st.Page('6_About_the_data.py', title='About The Data')
 
 # ====================== SIDEBAR NAVIGATION ======================
 st.sidebar.title("Navigation Pane:")
