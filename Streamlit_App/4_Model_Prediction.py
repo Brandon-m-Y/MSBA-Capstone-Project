@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+from pathlib import Path
 
 st.header("Predict if a New Customer Will Subscribe")
 st.caption(
@@ -10,9 +11,8 @@ st.caption(
 st.divider()
 
 # ── Load Model ─────────────────────────────────────────────────────────────────
-import xgboost as xgb
-model = xgb.XGBClassifier()
-model.load_model("Models/tuned_xgboost_model.json")
+_model_path = Path(__file__).parent.parent / "Models" / "tuned_xgboost_model.pkl"
+model = joblib.load(_model_path)
 
 # ── Input Form ─────────────────────────────────────────────────────────────────
 st.subheader("Customer Demographics")
