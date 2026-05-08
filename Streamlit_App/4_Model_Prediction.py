@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import joblib
+import xgboost as xgb
 from pathlib import Path
 
 st.header("Predict if a New Customer Will Subscribe")
@@ -11,8 +12,12 @@ st.caption(
 st.divider()
 
 # ── Load Model ─────────────────────────────────────────────────────────────────
-_model_path = Path(__file__).parent.parent / "Models" / "tuned_xgboost_model.pkl"
-model = joblib.load(_model_path)
+# Preprocessor is a plain sklearn ColumnTransformer (stable pickle)
+# XGBoost is loaded in native JSON format (version-agnostic, no pickle)
+_models = Path(__file__).parent.parent / "Models"
+preprocessor = joblib.load(_models / "fitted_preprocessor.pkl")
+booster = xgb.Booster()
+booster.load_model(str(_models / "tuned_xgboost_model.json"))
 
 # ── Input Form ─────────────────────────────────────────────────────────────────
 st.subheader("Customer Demographics")
@@ -135,8 +140,10 @@ input_df = pd.DataFrame({
 st.divider()
 if st.button("Predict Subscription", type="primary"):
     try:
-        prediction = model.predict(input_df)[0]
-        probability = model.predict_proba(input_df)[0][1]
+        X_arr = preprocessor.transform(input_df)
+        dmatrix = xgb.DMatrix(X_arr)
+        probability = float(booster.predict(dmatrix)[0])
+        prediction = 1 if probability >= 0.5 else 0
 
         if prediction == 1:
             st.success(f"This customer is **likely to subscribe** — {probability:.2%} confidence.")
