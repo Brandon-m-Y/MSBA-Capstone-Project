@@ -10,7 +10,9 @@ st.caption(
 st.divider()
 
 # ── Load Model ─────────────────────────────────────────────────────────────────
-model = joblib.load("Models/tuned_xgboost_model.pkl")
+import xgboost as xgb
+model = xgb.XGBClassifier()
+model.load_model("Models/tuned_xgboost_model.json")
 
 # ── Input Form ─────────────────────────────────────────────────────────────────
 st.subheader("Customer Demographics")
