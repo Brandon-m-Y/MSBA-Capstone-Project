@@ -2,4 +2,3 @@ joblib
 scikit-learn
 numpy
 pandas
-python-3.11
