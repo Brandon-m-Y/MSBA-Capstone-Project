@@ -1,6 +1,7 @@
+import json
 import streamlit as st
 import pandas as pd
-import joblib
+import numpy as np
 import xgboost as xgb
 from pathlib import Path
 
@@ -11,13 +12,29 @@ st.caption(
 )
 st.divider()
 
-# ── Load Model ─────────────────────────────────────────────────────────────────
-# Preprocessor is a plain sklearn ColumnTransformer (stable pickle)
-# XGBoost is loaded in native JSON format (version-agnostic, no pickle)
+# ── Load Model (fully version-agnostic — no pickle) ────────────────────────────
 _models = Path(__file__).parent.parent / "Models"
-preprocessor = joblib.load(_models / "fitted_preprocessor.pkl")
-booster = xgb.Booster()
-booster.load_model(str(_models / "tuned_xgboost_model.json"))
+
+with open(_models / "preprocessor_state.json") as f:
+    _state = json.load(f)
+
+_booster = xgb.Booster()
+_booster.load_model(str(_models / "tuned_xgboost_model.json"))
+
+
+def _preprocess(df: pd.DataFrame) -> np.ndarray:
+    numeric = (
+        df[_state["numeric_cols"]].values.astype(float)
+        - np.array(_state["scaler_mean"])
+    ) / np.array(_state["scaler_scale"])
+
+    cat_parts = []
+    for col, cats in zip(_state["categorical_cols"], _state["ohe_categories"]):
+        val = df[col].iloc[0]
+        cat_parts.extend([1.0 if val == c else 0.0 for c in cats])
+
+    return np.hstack([numeric, np.array(cat_parts).reshape(1, -1)])
+
 
 # ── Input Form ─────────────────────────────────────────────────────────────────
 st.subheader("Customer Demographics")
@@ -140,9 +157,9 @@ input_df = pd.DataFrame({
 st.divider()
 if st.button("Predict Subscription", type="primary"):
     try:
-        X_arr = preprocessor.transform(input_df)
+        X_arr = _preprocess(input_df)
         dmatrix = xgb.DMatrix(X_arr)
-        probability = float(booster.predict(dmatrix)[0])
+        probability = float(_booster.predict(dmatrix)[0])
         prediction = 1 if probability >= 0.5 else 0
 
         if prediction == 1:
